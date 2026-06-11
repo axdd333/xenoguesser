@@ -19,8 +19,17 @@ form cannot lie: every trait is downstream of an earlier pressure.
 
 ## Play
 
-Open `index.html` in any modern browser. No build step, no dependencies.
-(Or serve the folder statically, e.g. `python3 -m http.server`.)
+Serve the folder over HTTP and open it in a modern browser — the 3D layer uses
+ES modules + an import map, which browsers only load over `http(s)://`, not
+`file://`:
+
+```
+python3 -m http.server 8000
+# then open http://localhost:8000
+```
+
+No build step and no network dependency: Three.js (core + OrbitControls + bloom
+post-processing + environment) is vendored locally under `vendor/`.
 
 - **Read the instruments.** Morphology, metabolism, behavior, culture residue,
   singularity artifacts, and the planetary shadow each reveal a slice of the
@@ -85,7 +94,20 @@ Determinism: the same Worldseed string always produces the same alien.
 | `js/rules.js` | Causal trait rules for every pipeline stage |
 | `js/engine.js` | Worldseed generation + the simulation pipeline |
 | `js/scoring.js` | Guess construction + tag-overlap scoring |
-| `js/instruments.js` | The six instruments + procedural creature glyph |
-| `js/app.js` | Game flow, DOM rendering, the post-verdict reveal |
+| `js/instruments.js` | The six instrument text readouts |
+| `js/3d/creature.js` | Procedural 3D creature built from the tag pool |
+| `js/3d/scene.js` | Hyperspace scene: stars, suns, planet shadow, lighting, bloom |
+| `js/main.js` | Game flow, holographic HUD, the post-verdict reveal |
+| `vendor/` | Locally-vendored Three.js (core + addons), MIT licensed |
+
+### The specimen is rendered, not drawn
+
+The alien is a real-time 3D form you orbit, not a sprite. Body symmetry, build,
+limb count, armor, senses, bioluminescence, and colour are all read off the same
+causal tags — a radial filter-feeder becomes a translucent tentacled bell, an
+armored predator becomes a plated arthropod, a dark-world species glows with
+localized photophores. Soft-tissue forms use a subsurface (translucent) physical
+material; exoskeletons use a hard chitinous clearcoat; everything is lit by an
+image-based environment with Unreal-style bloom. Same Worldseed → same creature.
 
 All speculative and non-actionable by design.
