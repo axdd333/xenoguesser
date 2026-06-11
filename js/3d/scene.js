@@ -10,6 +10,7 @@ import { OrbitControls } from './../../vendor/jsm/controls/OrbitControls.js';
 import { EffectComposer } from './../../vendor/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from './../../vendor/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from './../../vendor/jsm/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from './../../vendor/jsm/postprocessing/ShaderPass.js';
 import { OutputPass } from './../../vendor/jsm/postprocessing/OutputPass.js';
 import { RoomEnvironment } from './../../vendor/jsm/RoomEnvironment.js';
 import { buildCreature } from './creature.js';
@@ -64,6 +65,31 @@ export class XenoScene {
     this.composer.addPass(new RenderPass(this.scene, this.camera));
     this.bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.45, 0.36, 0.82);
     this.composer.addPass(this.bloom);
+
+    // cinematic grade: vignette, fine film grain, and a whisper of chromatic
+    // aberration at the edges -- pulls the render away from "clean CG".
+    this.grade = new ShaderPass({
+      uniforms: { tDiffuse: { value: null }, time: { value: 0 },
+        grain: { value: 0.05 }, vignette: { value: 1.15 }, aberration: { value: 0.0016 } },
+      vertexShader: 'varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+      fragmentShader: [
+        'uniform sampler2D tDiffuse; uniform float time, grain, vignette, aberration; varying vec2 vUv;',
+        'float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }',
+        'void main(){',
+        '  vec2 d = vUv - 0.5;',
+        '  float r = texture2D(tDiffuse, vUv + d*aberration).r;',
+        '  float g = texture2D(tDiffuse, vUv).g;',
+        '  float b = texture2D(tDiffuse, vUv - d*aberration).b;',
+        '  vec3 col = vec3(r,g,b);',
+        '  float vig = smoothstep(1.25, vignette*0.35, length(d)*2.0);',
+        '  col *= mix(0.62, 1.0, vig);',
+        '  float n = hash(vUv*vec2(1920.0,1080.0) + time);',
+        '  col += (n - 0.5) * grain;',
+        '  gl_FragColor = vec4(col, 1.0);',
+        '}',
+      ].join('\n'),
+    });
+    this.composer.addPass(this.grade);
     this.composer.addPass(new OutputPass());
 
     this.starGroup = new THREE.Group();
@@ -199,10 +225,11 @@ export class XenoScene {
     // planet shadow (a distant world)
     if (this.planet) this.scene.remove(this.planet);
     const pc = PLANET_COLOR[ch.planetType.id] || 0x6a6a72;
-    const planet = new THREE.Mesh(new THREE.SphereGeometry(11, 48, 48),
-      new THREE.MeshStandardMaterial({ color: new THREE.Color(pc).multiplyScalar(0.5), roughness: 1, metalness: 0,
-        emissive: new THREE.Color(pc).multiplyScalar(0.04), envMapIntensity: 0.25 }));
-    planet.position.set(-38, -16, -56);
+    const planet = new THREE.Mesh(new THREE.SphereGeometry(9, 48, 48),
+      new THREE.MeshStandardMaterial({ color: new THREE.Color(pc).multiplyScalar(0.45), roughness: 1, metalness: 0,
+        emissive: new THREE.Color(pc).multiplyScalar(0.03), envMapIntensity: 0.2 }));
+    // a distant world up in the sky, clear of the specimen
+    planet.position.set(-52, 17, -64);
     this.scene.add(planet);
     this.planet = planet;
     // ring system
@@ -246,6 +273,7 @@ export class XenoScene {
       if (this.creature && this.creature.userData.animate) this.creature.userData.animate(t);
       if (this.platform) this.platform.rotation.y = t * 0.08;
       if (this.stars) this.stars.rotation.y = t * 0.005;
+      if (this.grade) this.grade.uniforms.time.value = t;
       if (this.flicker && this.suns) {
         const f = 0.7 + 0.3 * Math.abs(Math.sin(t * 7.0) * Math.sin(t * 2.3));
         for (const s of this.suns) s.light.intensity = s.base * f;

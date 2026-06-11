@@ -170,6 +170,7 @@ function renderReveal() {
 // ---- boot ----
 function init() {
   state.scene = new XenoScene($('#stage'));
+  if (location.search.includes('debug')) window.__scene = state.scene;
   state.scene.start();
 
   $('#reconstruct-btn').addEventListener('click', openReconstruct);

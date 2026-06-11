@@ -6,6 +6,52 @@
  * theorem; nothing here is arbitrary.
  */
 import * as THREE from 'three';
+import { MarchingCubes } from './../../vendor/jsm/objects/MarchingCubes.js';
+
+// ---- procedural skin: a tiling normal map so flesh has micro-relief and
+// armored forms have scales/plates instead of looking like smooth plastic ----
+const _skinCache = {};
+function makeSkinNormal(mode) {
+  if (_skinCache[mode]) return _skinCache[mode];
+  const N = 256;
+  const cv = document.createElement('canvas'); cv.width = cv.height = N;
+  const ctx = cv.getContext('2d');
+  const img = ctx.createImageData(N, N);
+  const h = new Float32Array(N * N);
+  const hash = (x, y) => { const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return n - Math.floor(n); };
+  const vnoise = (x, y) => {
+    const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+    const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+    const a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+    return a * (1 - u) * (1 - v) + b * u * (1 - v) + c * (1 - u) * v + d * u * v;
+  };
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    let f = 0, amp = 0.5, frq = mode === 'scales' ? 5 : 9;
+    for (let o = 0; o < 4; o++) { f += amp * vnoise(x / N * frq, y / N * frq); frq *= 2; amp *= 0.5; }
+    if (mode === 'scales') {
+      const gx = x / N * 11, gy = y / N * 11;
+      const cell = Math.abs(Math.sin(gx * 1.7) * Math.sin(gy * 1.9));
+      f = 0.55 * f + 0.45 * Math.pow(cell, 0.6);
+    }
+    h[y * N + x] = f;
+  }
+  const str = mode === 'scales' ? 2.4 : 1.3;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const xl = h[y * N + ((x - 1 + N) % N)], xr = h[y * N + ((x + 1) % N)];
+    const yl = h[((y - 1 + N) % N) * N + x], yr = h[((y + 1) % N) * N + x];
+    let nx = -(xr - xl) * str, ny = -(yr - yl) * str, nz = 1;
+    const len = Math.hypot(nx, ny, nz); nx /= len; ny /= len; nz /= len;
+    const i = (y * N + x) * 4;
+    img.data[i] = (nx * 0.5 + 0.5) * 255; img.data[i + 1] = (ny * 0.5 + 0.5) * 255;
+    img.data[i + 2] = (nz * 0.5 + 0.5) * 255; img.data[i + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(mode === 'scales' ? 4 : 6, mode === 'scales' ? 4 : 6);
+  _skinCache[mode] = tex;
+  return tex;
+}
 
 const STAR_COLOR = {
   gstar: 0xfff1d8, reddwarf: 0xff5a3c, orange: 0xffae5a,
@@ -81,6 +127,26 @@ function bone(a, b, r0, r1, mat) {
   return m;
 }
 
+// build a smooth organic mass from metaballs (marching cubes). balls are given
+// as { p: Vector3 offset from center, r: world radius }. Returns a baked mesh.
+function metaballMass(balls, center, scale, mat, res) {
+  const mc = new MarchingCubes(res, mat, true, false, 80000);
+  mc.isolation = 80;
+  mc.position.copy(center);
+  mc.scale.copy(scale);
+  const avg = (scale.x + scale.y + scale.z) / 3;
+  const subtract = 12;
+  for (const b of balls) {
+    const fx = 0.5 + b.p.x / (2 * scale.x);
+    const fy = 0.5 + b.p.y / (2 * scale.y);
+    const fz = 0.5 + b.p.z / (2 * scale.z);
+    const rf = b.r / (2 * avg);
+    mc.addBall(fx, fy, fz, subtract * rf * rf, subtract);
+  }
+  mc.update();
+  return mc;
+}
+
 function glow(color, size) {
   const m = new THREE.Mesh(
     new THREE.SphereGeometry(size, 16, 16),
@@ -113,6 +179,10 @@ export function buildCreature(spec) {
     iridescence: has('CHROMATIC') ? 0.6 : 0.0, iridescenceIOR: 1.3,
     envMapIntensity: 0.9,
   });
+  // skin micro-relief: scales/plates for armored forms, fine bumps otherwise
+  const skinTex = makeSkinNormal(pal.flat ? 'scales' : 'skin');
+  bodyMat.normalMap = skinTex;
+  bodyMat.normalScale = new THREE.Vector2(pal.flat ? 0.8 : 0.35, pal.flat ? 0.8 : 0.35);
   const limbMat = bodyMat.clone();
 
   // chromatophore skin: animate a hue cycle
@@ -203,13 +273,30 @@ export function buildCreature(spec) {
     anim.push({ obj: body, fn: (t) => { core.rotation.y = 0; body.rotation.z = 0.05 * Math.sin(t * 1.6); tail.rotation.z = 0.25 * Math.sin(t * 1.6 + 0.4); } });
     headHost = core; headY = 0.78; headFwd = 0.95;
   } else {
-    // bilateral terrestrial
+    // bilateral terrestrial -- organic metaball torso (shoulders, chest, belly
+    // and hips flow into one mass instead of a hard capsule)
     const th = gracile ? 1.7 : (stocky ? 0.95 : 1.25);
     const tw = stocky ? 0.85 : (gracile ? 0.42 : 0.6);
-    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(tw, th, 12, 28), bodyMat);
     const hipY = stocky ? 0.95 : (gracile ? 1.7 : 1.35);
-    torso.position.y = hipY;
-    core.add(torso);
+    const center = new THREE.Vector3(0, hipY, 0);
+    // a slimmer field for slender builds so the torso elongates instead of
+    // ballooning; metaball overlap already inflates the surface, so radii are
+    // kept tight.
+    const wide = gracile ? 2.0 : (stocky ? 2.8 : 2.4);
+    const mscale = new THREE.Vector3(tw * wide, th * 1.05, tw * wide);
+    const torsoBalls = [
+      { p: new THREE.Vector3(0, -th * 0.44, 0), r: tw * 0.78 },         // hips
+      { p: new THREE.Vector3(0, -th * 0.2, tw * 0.16), r: tw * 0.72 },  // belly
+      { p: new THREE.Vector3(0, th * 0.02, tw * 0.06), r: tw * 0.78 },  // chest
+      { p: new THREE.Vector3(0, th * 0.24, 0), r: tw * 0.66 },          // sternum
+      { p: new THREE.Vector3(0, th * 0.42, 0), r: tw * 0.52 },          // upper chest
+      { p: new THREE.Vector3(-tw * 0.78, th * 0.44, 0), r: tw * 0.4 },  // shoulder L
+      { p: new THREE.Vector3(tw * 0.78, th * 0.44, 0), r: tw * 0.4 },   // shoulder R
+      { p: new THREE.Vector3(0, th * 0.56, 0), r: tw * 0.34 },          // neck base
+    ];
+    const torsoMesh = metaballMass(torsoBalls, center, mscale, bodyMat, 64);
+    core.add(torsoMesh);
+    const torso = new THREE.Group(); torso.position.copy(center); core.add(torso); // speckle anchor
     speckle(torso, 10, tw + 0.1);
 
     // armor plates down the back
