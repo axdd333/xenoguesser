@@ -418,9 +418,36 @@ export function buildCreature(spec) {
   } else {
     head.position.set(0, headY, 0);
   }
+  const predator = has('PREDATION') || has('AMBUSH');
   const skull = new THREE.Mesh(new THREE.SphereGeometry(headR, 32, 24), bodyMat);
+  skull.scale.set(1.05, 0.92, 1.05);
   if (aquatic) skull.scale.set(0.9, 0.8, 1.3);
   head.add(skull);
+  if (!radial) {
+    // muzzle, jaw and brow give the head a face. Predators get a longer,
+    // toothed jaw -- the skull is downstream of the hunting niche too.
+    const mz = predator ? 1.05 : 0.6;
+    const muzzle = new THREE.Mesh(new THREE.SphereGeometry(headR * 0.6, 20, 16), bodyMat);
+    muzzle.scale.set(0.82, 0.66, 1.5 * mz);
+    muzzle.position.set(0, -headR * 0.12, headR * (0.7 + 0.18 * mz));
+    head.add(muzzle);
+    const jaw = new THREE.Mesh(new THREE.SphereGeometry(headR * 0.5, 18, 14), bodyMat);
+    jaw.scale.set(0.74, 0.4, 1.35 * mz);
+    jaw.position.set(0, -headR * 0.34, headR * (0.6 + 0.18 * mz));
+    head.add(jaw);
+    anim.push({ obj: jaw, fn: (t) => { jaw.rotation.x = 0.05 + 0.05 * Math.max(0, Math.sin(t * 0.7)); } });
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(headR * 1.02, headR * 0.16, headR * 0.42), bodyMat);
+    brow.position.set(0, headR * 0.32, headR * 0.5);
+    head.add(brow);
+    if (predator) {
+      const tm = new THREE.MeshStandardMaterial({ color: 0xf2efe6, roughness: 0.5 });
+      for (let i = 0; i < 4; i++) for (const sx of [-1, 1]) {
+        const tooth = new THREE.Mesh(new THREE.ConeGeometry(headR * 0.05, headR * 0.2, 4), tm);
+        tooth.position.set(sx * headR * 0.17, -headR * 0.24, headR * (0.72 + i * 0.16 * mz));
+        tooth.rotation.x = Math.PI; head.add(tooth);
+      }
+    }
+  }
   headHost.add(head);
 
   // echolocation melon / dish ears
