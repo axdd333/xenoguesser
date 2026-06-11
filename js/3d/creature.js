@@ -99,18 +99,26 @@ function segment(len, r0, r1, mat, seg = 10) {
   return new THREE.Mesh(g, mat);
 }
 
-// nested two-bone limb so it can be posed and animated as a chain
+// nested two-bone limb so it can be posed and animated as a chain. Joint balls
+// at hip/knee and a foot at the tip make it read as an articulated limb with
+// muscle rather than a tapered wire.
+function joint(r, mat) { return new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), mat); }
 function limb(opts) {
-  const { thigh, shin, r0, r1, r2, mat, rootAngle, kneeAngle } = opts;
+  const { thigh, shin, r0, r1, r2, mat, rootAngle, kneeAngle, foot } = opts;
   const root = new THREE.Group();
   root.rotation.z = rootAngle;
-  const a = segment(thigh, r0, r1, mat);
-  root.add(a);
+  root.add(joint(r0 * 1.15, mat));                 // hip/shoulder ball
+  root.add(segment(thigh, r0, r1, mat));
   const knee = new THREE.Group();
   knee.position.y = thigh;
   knee.rotation.z = kneeAngle;
-  const b = segment(shin, r1, r2, mat);
-  knee.add(b);
+  knee.add(joint(r1 * 1.2, mat));                  // knee/elbow ball
+  knee.add(segment(shin, r1, r2, mat));
+  if (foot !== false) {
+    const f = new THREE.Mesh(new THREE.SphereGeometry(r2 * 1.6, 10, 8), mat);
+    f.scale.set(1.4, 0.7, 1.6); f.position.set(0, shin, r2 * 0.8);
+    knee.add(f);
+  }
   root.add(knee);
   return root;
 }
@@ -324,7 +332,7 @@ export function buildCreature(spec) {
     // legs
     const pairs = stocky ? 3 : 2;
     const legLen = gracile ? 1.1 : (stocky ? 0.55 : 0.8);
-    const legR = stocky ? 0.16 : (gracile ? 0.07 : 0.11);
+    const legR = stocky ? 0.22 : (gracile ? 0.11 : 0.16);
     for (let p = 0; p < pairs; p++) {
       for (const sx of [-1, 1]) {
         const L = limb({ thigh: legLen, shin: legLen * 0.95, r0: legR, r1: legR * 0.7, r2: legR * 0.45,

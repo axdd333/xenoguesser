@@ -59,6 +59,7 @@ export class XenoScene {
     this._buildBackdrop();
     this._buildLights();
     this._buildPlatform();
+    this._buildDust();
 
     // post-processing
     this.composer = new EffectComposer(this.renderer);
@@ -169,9 +170,35 @@ export class XenoScene {
       const pts = [new THREE.Vector3(Math.cos(a) * 0.4, 0, Math.sin(a) * 0.4), new THREE.Vector3(Math.cos(a) * 3.1, 0, Math.sin(a) * 3.1)];
       g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), spokeMat));
     }
+    // soft contact shadow grounds the specimen on the platform
+    const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+    const cx = cv.getContext('2d');
+    const grd = cx.createRadialGradient(64, 64, 4, 64, 64, 64);
+    grd.addColorStop(0, 'rgba(0,0,0,0.55)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
+    cx.fillStyle = grd; cx.fillRect(0, 0, 128, 128);
+    const shadow = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4),
+      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false, opacity: 0.9 }));
+    shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.04;
+    g.add(shadow);
+
     g.position.y = 0.02;
     this.scene.add(g);
     this.platform = g;
+  }
+
+  _buildDust() {
+    const N = 160, pos = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 9;
+      pos[i * 3 + 1] = Math.random() * 5;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 9;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    this.dust = new THREE.Points(g, new THREE.PointsMaterial({
+      color: 0x9fd6ff, size: 0.035, transparent: true, opacity: 0.5,
+      depthWrite: false, blending: THREE.AdditiveBlending }));
+    this.scene.add(this.dust);
   }
 
   _clearStars() {
@@ -274,6 +301,7 @@ export class XenoScene {
       if (this.platform) this.platform.rotation.y = t * 0.08;
       if (this.stars) this.stars.rotation.y = t * 0.005;
       if (this.grade) this.grade.uniforms.time.value = t;
+      if (this.dust) { this.dust.rotation.y = t * 0.02; this.dust.position.y = Math.sin(t * 0.3) * 0.2; }
       if (this.flicker && this.suns) {
         const f = 0.7 + 0.3 * Math.abs(Math.sin(t * 7.0) * Math.sin(t * 2.3));
         for (const s of this.suns) s.light.intensity = s.base * f;
