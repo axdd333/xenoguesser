@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xenoguesser — reverse-engineer an alien from its hidden world</title>
+  <meta name="description" content="An engine that peers into hyperspace and discovers alien lifeforms from hidden causal worlds. Read the instruments. Reconstruct the Worldseed." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="starfield" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">⟁</span>
+      <div>
+        <h1>XENOGUESSER</h1>
+        <p class="tagline">An instrument for peering into hyperspace. Every alien is a theorem with skin.</p>
+      </div>
+    </div>
+    <div class="controls">
+      <form id="seedform" class="seedform" autocomplete="off">
+        <input id="seedinput" type="text" placeholder="enter a worldseed…" aria-label="worldseed" />
+        <button type="submit" class="ghost">Lock</button>
+      </form>
+      <button id="new-btn" class="ghost">New signal</button>
+      <button id="share-btn" class="ghost">Share seed</button>
+    </div>
+  </header>
+
+  <section class="signal-banner">
+    <div>
+      <span class="sig-key">SIGNAL</span>
+      <span id="designation" class="designation">—</span>
+    </div>
+    <div>
+      <span class="sig-key">WORLDSEED</span>
+      <span id="seed-label" class="seed">—</span>
+    </div>
+    <p class="signal-note">A hidden world has already run its course. You receive only the final form. Read the instruments — then reconstruct the causes.</p>
+  </section>
+
+  <main>
+    <h2 class="section-h">⟢ Instruments</h2>
+    <div id="instruments" class="instrument-grid"></div>
+
+    <h2 class="section-h">⟢ Reconstruction</h2>
+    <p class="section-sub">You are not guessing a planet. You are reconstructing a causal chain. Partial credit is given for catching the right <em>pressure</em>, even if you miss the exact label.</p>
+    <div id="guess" class="guess-grid"></div>
+
+    <div class="submit-row">
+      <button id="submit-btn" class="primary">Submit reconstruction</button>
+    </div>
+
+    <div id="verdict" class="verdict"></div>
+    <div id="reveal" class="reveal"></div>
+  </main>
+
+  <footer class="footer">
+    <p>Speculative evolutionary inference — natural selection, sensory ecology, niche construction, gene-culture coevolution. Sci-fi, not biology protocol.</p>
+  </footer>
+
+  <script src="js/rng.js"></script>
+  <script src="js/concepts.js"></script>
+  <script src="js/worldseed.js"></script>
+  <script src="js/celestial.js"></script>
+  <script src="js/rules.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/instruments.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
