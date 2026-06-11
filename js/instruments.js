@@ -13,18 +13,18 @@
   'use strict';
 
   var ORDER = [
-    { key: 'morphology', name: 'Morphology scan', icon: '◉',
-      blurb: 'Body plan · symmetry · limbs · armor · sensory organs · locomotion' },
-    { key: 'metabolism', name: 'Metabolism scan', icon: '◈',
-      blurb: 'Energy source · thermal range · chemistry · scarcity adaptations' },
-    { key: 'behavior', name: 'Behavioral echo', icon: '◌',
-      blurb: 'Hunting · hiding · mating · migration · cooperation · deception' },
-    { key: 'culture', name: 'Culture residue', icon: '⌘',
-      blurb: 'Architecture · myth · taboo · symbol · burial · communication' },
-    { key: 'singularity', name: 'Singularity artifact', icon: '⟡',
-      blurb: 'Evidence of self-modification after gaining control of its own form' },
-    { key: 'shadow', name: 'Planetary shadow', icon: '☾',
-      blurb: 'Indirect traces of gravity · light · sky · seasons · storms · tides' },
+    { key: 'morphology', name: 'Body Scan', icon: '◉',
+      blurb: 'Its shape, limbs, armor, eyes — and how it gets around' },
+    { key: 'metabolism', name: 'Fuel Scan', icon: '◈',
+      blurb: 'What it runs on: heat, cold, food, light or chemicals' },
+    { key: 'behavior', name: 'Behavior', icon: '◌',
+      blurb: 'Hunting, hiding, mating, packs, tricks, fighting, caring' },
+    { key: 'culture', name: 'Ruins & Culture', icon: '⌘',
+      blurb: 'Buildings, myths, taboos, tools, graves, how they talk' },
+    { key: 'singularity', name: 'Did They Ascend?', icon: '⟡',
+      blurb: 'Signs they rebuilt their own bodies and minds' },
+    { key: 'shadow', name: 'Sky Clues', icon: '☾',
+      blurb: 'Hints of gravity, light, seasons, storms, moons, the star' },
   ];
 
   function readingsFor(spec, instKey) {
@@ -54,12 +54,12 @@
 
   function emptyMessage(key, spec) {
     if (key === 'culture' && !spec.milestones.culture)
-      return 'No symbolic residue detected. This lineage never crossed into cumulative culture — the instrument returns only noise.';
+      return 'Nothing here. These never built a real culture — no art, no myths, no cities. Just animals doing animal things.';
     if (key === 'singularity' && !spec.milestones.singularity)
       return spec.milestones.tech
-        ? 'Tool-use traces present, but no self-modification artifacts. They reached the threshold and did not cross it.'
-        : 'No technological or self-modification artifacts. This form is the raw product of natural selection alone.';
-    return 'No clear reading on this band.';
+        ? 'They had tools, but never started rebuilding themselves. So close, and they never crossed the line.'
+        : 'No tech, no self-tinkering. This is pure evolution, start to finish — nothing engineered.';
+    return 'Nothing clear on this channel.';
   }
 
 

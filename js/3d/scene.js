@@ -277,9 +277,10 @@ export class XenoScene {
   }
 
   frame() {
-    // gently reset camera to a flattering 3/4 view
-    this.camera.position.set(4.8, 2.8, 6.4);
-    this.controls.update();
+    // cinematic fly-in: start far and high, ease down to the 3/4 framing
+    this._intro = 0;
+    this._lastT = this.clock.getElapsedTime();
+    this.controls.enabled = false;
   }
 
   resize() {
@@ -296,7 +297,21 @@ export class XenoScene {
     const loop = () => {
       this.raf = requestAnimationFrame(loop);
       const t = this.clock.getElapsedTime();
-      this.controls.update();
+      const dt = Math.min(0.05, t - (this._lastT != null ? this._lastT : t));
+      this._lastT = t;
+      if (!this.controls.enabled) {
+        this._intro += dt;
+        const k = Math.min(1, this._intro / 1.7);
+        const e = 1 - Math.pow(1 - k, 3); // easeOutCubic
+        this.camera.position.set(
+          THREE.MathUtils.lerp(11, 4.8, e),
+          THREE.MathUtils.lerp(8, 2.8, e),
+          THREE.MathUtils.lerp(15.5, 6.4, e));
+        this.camera.lookAt(this.controls.target);
+        if (k >= 1) this.controls.enabled = true;
+      } else {
+        this.controls.update();
+      }
       if (this.creature && this.creature.userData.animate) this.creature.userData.animate(t);
       if (this.platform) this.platform.rotation.y = t * 0.08;
       if (this.stars) this.stars.rotation.y = t * 0.005;

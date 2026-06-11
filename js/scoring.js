@@ -49,8 +49,8 @@
 
     // 1. Planet type (single, tag-overlap scored)
     cats.push({
-      key: 'planet', title: 'Planet type', mode: 'single',
-      prompt: 'What kind of world produced this form?',
+      key: 'planet', title: 'What kind of planet?', mode: 'single',
+      prompt: 'What world made this thing?',
       options: XG.DIMENSIONS.find(function (d) { return d.key === 'planetType'; }).options.map(function (o) {
         return { id: o.id, label: o.label, tags: (o.tags || []).map(function (t) { return t.tag; }) };
       }),
@@ -60,8 +60,8 @@
 
     // 2. Star system (single)
     cats.push({
-      key: 'star', title: 'Star system', mode: 'single',
-      prompt: 'What was in its sky?',
+      key: 'star', title: "What's their sun?", mode: 'single',
+      prompt: "What's burning in their sky?",
       options: XG.DIMENSIONS.find(function (d) { return d.key === 'starSystem'; }).options.map(function (o) {
         return { id: o.id, label: o.label, tags: (o.tags || []).map(function (t) { return t.tag; }) };
       }),
@@ -72,32 +72,32 @@
     // 3. Main environmental pressures (multi)
     var pressureAns = topRootPressures(spec.worldseed.basePool, 6);
     cats.push({
-      key: 'pressures', title: 'Main environmental pressures', mode: 'multi',
-      prompt: 'Select the dominant pressures that shaped this lineage.',
+      key: 'pressures', title: 'What made life brutal here?', mode: 'multi',
+      prompt: 'Pick the big things this creature had to survive.',
       chips: buildChips(pressureAns, rng, 7), answerTags: pressureAns,
     });
 
     // 4. Evolutionary pathway (multi) -- ecology + body
     var pathAns = emittedByStages(rec, ['ecology', 'body', 'senses']);
     cats.push({
-      key: 'pathway', title: 'Evolutionary pathway', mode: 'multi',
-      prompt: 'How did selection actually solve this world?',
+      key: 'pathway', title: 'How did they survive?', mode: 'multi',
+      prompt: 'What tricks did they evolve to get by?',
       chips: buildChips(pathAns, rng, 7), answerTags: pathAns,
     });
 
     // 5. Cognitive adaptations (multi)
     var cogAns = emittedByStages(rec, ['cognition']);
     cats.push({
-      key: 'cognition', title: 'Cognitive adaptations', mode: 'multi',
-      prompt: 'What is this mind for?',
+      key: 'cognition', title: 'How smart did they get?', mode: 'multi',
+      prompt: "What's this brain actually built to do?",
       chips: buildChips(cogAns.length ? cogAns : ['SPATIAL_MAP'], rng, 6), answerTags: cogAns,
     });
 
     // 6. Cultural consequences (multi)
     var cultAns = emittedByStages(rec, ['culture']);
     cats.push({
-      key: 'culture', title: 'Cultural consequences', mode: 'multi',
-      prompt: spec.milestones.culture ? 'What did their culture become?' : 'Did culture even emerge here?',
+      key: 'culture', title: "What's their culture like?", mode: 'multi',
+      prompt: spec.milestones.culture ? 'What did their society turn into?' : 'Did they even build a culture?',
       chips: buildChips(cultAns.length ? cultAns : ['CULTURE_PRESENT'], rng, 6), answerTags: cultAns,
     });
 
@@ -105,13 +105,13 @@
     var singId = spec.milestones.singularity ? (spec.milestones.postbio ? 'postbio' : 'yes')
       : (spec.milestones.tech ? 'partial' : 'no');
     cats.push({
-      key: 'singularity', title: 'Did they reach a singularity?', mode: 'single',
-      prompt: 'Did they gain control over their own biology/embodiment?',
+      key: 'singularity', title: 'Did they go full sci-fi?', mode: 'single',
+      prompt: 'Did they take control of their own bodies and minds?',
       options: [
-        { id: 'no', label: 'No — never reached technology', tags: ['NO_SINGULARITY'] },
-        { id: 'partial', label: 'Approached it — tech-capable, not yet self-modifying', tags: ['TECH_CAPABLE'] },
-        { id: 'yes', label: 'Yes — crossed a self-modification singularity', tags: ['SINGULARITY'] },
-        { id: 'postbio', label: 'Yes, and went post-biological', tags: ['SINGULARITY', 'POSTBIO'] },
+        { id: 'no', label: 'Nope — just animals', tags: ['NO_SINGULARITY'] },
+        { id: 'partial', label: 'Had tools, but stopped there', tags: ['TECH_CAPABLE'] },
+        { id: 'yes', label: 'Yeah — they started rebuilding themselves', tags: ['SINGULARITY'] },
+        { id: 'postbio', label: 'Yeah, and ditched their bodies entirely', tags: ['SINGULARITY', 'POSTBIO'] },
       ],
       answerId: singId,
       answerTags: singId === 'postbio' ? ['SINGULARITY', 'POSTBIO'] : (singId === 'yes' ? ['SINGULARITY'] : (singId === 'partial' ? ['TECH_CAPABLE'] : ['NO_SINGULARITY'])),
@@ -120,8 +120,8 @@
     // 8. How culture reshaped biology / postbiology (multi)
     var modAns = emittedByStages(rec, ['selfmod']);
     cats.push({
-      key: 'selfmod', title: 'How culture reshaped biology', mode: 'multi',
-      prompt: spec.milestones.singularity ? 'How did they rewrite themselves?' : 'If they had crossed over, which path was open to them?',
+      key: 'selfmod', title: 'How did they hack themselves?', mode: 'multi',
+      prompt: spec.milestones.singularity ? 'How did they rebuild their own bodies?' : 'If they ever crossed over, which way would they go?',
       chips: buildChips(modAns.length ? modAns : ['METAB_REWRITE', 'SENSORY_UPGRADE', 'BODY_REDESIGN'], rng, 5),
       answerTags: modAns,
     });
@@ -131,8 +131,8 @@
       topRootPressures(spec.worldseed.basePool, 6)
     )).slice(0, 7);
     cats.push({
-      key: 'inescapable', title: 'What the final form can never escape', mode: 'single',
-      prompt: 'Even after everything they became — what original constraint is still written into the final form?',
+      key: 'inescapable', title: "What can't they shake?", mode: 'single',
+      prompt: 'No matter what they became, what old scar is still baked in?',
       options: rootCandidates.map(function (t) { return { id: t, label: XG.concept.label(t), tags: [t] }; }),
       answerId: spec.rootPressure,
       answerTags: [spec.rootPressure],
@@ -190,11 +190,11 @@
   }
 
   function verdict(pct) {
-    if (pct >= 90) return { rank: 'XENO-ORACLE', note: 'You read the world off its children. The causal chain held end to end.' };
-    if (pct >= 75) return { rank: 'DEEP READER', note: 'You recovered most of the hidden Worldseed from the form alone.' };
-    if (pct >= 55) return { rank: 'FIELD ANALYST', note: 'Solid causal inference — you caught the dominant pressures.' };
-    if (pct >= 35) return { rank: 'PATTERN-SEEKER', note: 'You felt the shape of it, but missed deeper constraints.' };
-    return { rank: 'STATIC', note: 'The signal slipped past you. Read the chain below — it was always there.' };
+    if (pct >= 90) return { rank: 'MIND READER', note: 'Unreal. You basically read its whole home planet off its body.' };
+    if (pct >= 75) return { rank: 'ALIEN WHISPERER', note: 'Scary good. You nailed most of where this thing came from.' };
+    if (pct >= 55) return { rank: 'GOOD EYE', note: 'Nice. You caught the big stuff that shaped it.' };
+    if (pct >= 35) return { rank: 'GETTING WARMER', note: 'You felt the vibe, but missed a lot underneath.' };
+    return { rank: 'WAY OFF', note: 'Yeah... not quite. Check the breakdown below — it was all there in the body.' };
   }
 
   XG.scoring = {

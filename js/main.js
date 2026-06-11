@@ -72,12 +72,12 @@ function openReconstruct() {
   o.innerHTML = '';
   const wrap = el('div', 'overlay-inner');
   wrap.appendChild(el('button', 'overlay-x', '✕')).addEventListener('click', closeOverlay);
-  wrap.appendChild(el('h2', 'overlay-title', 'Reconstruct the causal chain'));
-  wrap.appendChild(el('p', 'overlay-sub', 'You are not guessing a planet. You are reconstructing causes. Partial credit is given for catching the right <em>pressure</em>, even if the exact label is wrong.'));
+  wrap.appendChild(el('h2', 'overlay-title', "So... where's it from?"));
+  wrap.appendChild(el('p', 'overlay-sub', "Read the scans and take your best guess. You score points for getting <em>close</em> — nail the right idea and you're good, even if you miss the exact name."));
   const grid = el('div', 'guess-grid');
   state.cats.forEach((cat) => grid.appendChild(renderCat(cat)));
   wrap.appendChild(grid);
-  const submit = el('button', 'primary big', 'Submit reconstruction');
+  const submit = el('button', 'primary big', 'Lock in my guesses');
   submit.addEventListener('click', () => doSubmit(wrap));
   wrap.appendChild(el('div', 'submit-row')).appendChild(submit);
   o.appendChild(wrap);
@@ -151,18 +151,18 @@ function renderReveal() {
     if (dim) seedRows += `<tr><td>${dim.title}</td><td>${ws[k].label}</td></tr>`;
   });
   const order = ['ecology', 'body', 'senses', 'cognition', 'social', 'culture', 'tech', 'selfmod'];
-  const names = { ecology: 'Ecology', body: 'Body plan', senses: 'Senses', cognition: 'Cognition', social: 'Social structure', culture: 'Culture', tech: 'Technology', selfmod: 'Self-modification' };
+  const names = { ecology: 'Making a living', body: 'Its body', senses: 'Its senses', cognition: 'Its mind', social: 'Society', culture: 'Culture', tech: 'Technology', selfmod: 'Rebuilding themselves' };
   let chain = '';
   order.forEach((sk) => {
     const traits = spec.record.filter((t) => t.stage === sk);
     if (!traits.length) return;
     chain += `<div class="chain-stage"><h4>${names[sk]}</h4><ul>${traits.map((t) => `<li><b>${t.title}</b> — ${t.reveal}</li>`).join('')}</ul></div>`;
   });
-  r.innerHTML = `<h2 class="reveal-title">The hidden Worldseed</h2>
-    <p class="reveal-sub">Every trait you scanned was downstream of this. The final form could not lie.</p>
+  r.innerHTML = `<h2 class="reveal-title">Here's where it's actually from</h2>
+    <p class="reveal-sub">Everything you scanned came from this. The body never lies.</p>
     <div class="reveal-grid"><div class="reveal-seed"><table>${seedRows}</table></div><div class="reveal-chain">${chain}</div></div>
-    <div class="reveal-root">The constraint it could never escape: <b>${XG.concept.label(spec.rootPressure)}</b></div>
-    <button class="primary big again">Peer into a new world →</button>`;
+    <div class="reveal-root">The one thing it could never escape: <b>${XG.concept.label(spec.rootPressure)}</b></div>
+    <button class="primary big again">Next alien →</button>`;
   r.querySelector('.again').addEventListener('click', () => { newGame(); });
   return r;
 }
