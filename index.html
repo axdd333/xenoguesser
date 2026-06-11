@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xenoguesser — scan an alien, guess its world</title>
+  <meta name="description" content="Scan a strange 3D alien and figure out the planet that made it. Spin it around, read the scanners, take your best guess." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="stage"></canvas>
+
+  <div id="hud">
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">⟁</span>
+        <div>
+          <h1>XENOGUESSER</h1>
+          <p class="tagline">Scan a weird alien. Figure out the planet that made it.</p>
+        </div>
+      </div>
+      <div class="controls">
+        <form id="seedform" class="seedform" autocomplete="off">
+          <input id="seedinput" type="text" placeholder="worldseed…" aria-label="worldseed" />
+          <button type="submit" class="ghost">Lock</button>
+        </form>
+        <button id="new-btn" class="ghost">New signal</button>
+        <button id="share-btn" class="ghost">Share</button>
+        <button id="rotate-btn" class="ghost">Spin: on</button>
+      </div>
+    </header>
+
+    <div class="signal-strip">
+      <div><span class="sig-key">SIGNAL</span><span id="designation" class="designation">—</span></div>
+      <div><span class="sig-key">WORLDSEED</span><span id="seed-label" class="seed">—</span></div>
+    </div>
+
+    <nav id="inst-rail" class="inst-rail" aria-label="instruments"></nav>
+
+    <aside id="inst-panel" class="panel hidden"></aside>
+
+    <div class="dock">
+      <button id="reconstruct-btn" class="primary">Take a guess ▸</button>
+      <span class="dock-hint">drag to spin · scroll to zoom · tap the scanners on the left</span>
+    </div>
+
+    <div id="overlay" class="overlay hidden"></div>
+  </div>
+
+  <!-- causal engine (classic scripts, populate window.XG) -->
+  <script src="js/rng.js"></script>
+  <script src="js/concepts.js"></script>
+  <script src="js/worldseed.js"></script>
+  <script src="js/celestial.js"></script>
+  <script src="js/rules.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/instruments.js"></script>
+  <!-- 3D presentation (ES module) -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
