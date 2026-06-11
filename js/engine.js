@@ -98,7 +98,9 @@
     var socialBrain = poolHas(pool, 'SOCIAL_BRAIN') || poolHas(pool, 'DISTRIBUTED');
     var flexible = poolHas(pool, 'INNOVATION') || poolHas(pool, 'PLANNING');
     var lifeHistory = poolHasAny(pool, ['PAIR_BOND', 'EUSOCIAL', 'DISTRIBUTED', 'SELF_DOMESTICATION']);
-    if (cog >= 2 && socialBrain && flexible && lifeHistory) {
+    // idempotent: this runs after both cognition and social stages, but the
+    // tag must only be credited once or it double-counts in complexityScore.
+    if (cog >= 2 && socialBrain && flexible && lifeHistory && !poolHas(pool, 'COMPLEX_COGNITION')) {
       poolAdd(pool, 'COMPLEX_COGNITION', 2);
     }
   }
@@ -119,7 +121,7 @@
     for (t in neg) s -= (pool[t] || 0) * neg[t];
     return s;
   }
-  var THRESH = { culture: 11.0, tech: 13.5, singularity: 15.0 };
+  var THRESH = { culture: 9.5, tech: 10.5, singularity: 12.0 };
 
   function aggregateCulture(pool, record) {
     if (poolHas(pool, 'COMPLEX_COGNITION') &&
@@ -201,15 +203,24 @@
 
   // the strongest non-trivial seed pressure
   function strongestRoot(basePool) {
-    var best = null, bestW = -1;
     // pressures that count as "deep constraints" worth being inescapable
     var rootable = ['HIGH_G', 'LOW_G', 'AQUATIC', 'PERPETUAL_NIGHT', 'DARKNESS',
       'RADIATION', 'STAR_FLARE', 'SCARCITY', 'COLD', 'HEAT', 'CATASTROPHE',
       'TERMINATOR', 'HIGH_PRESSURE', 'TOXIC_AIR', 'SUBSURFACE', 'INSTABILITY',
       'BOOM_BUST', 'NO_PREDATORS', 'PREDATION', 'CHEMOSYNTH', 'HIGH_UV'];
+    // bestW starts at 0 so only pressures ACTUALLY present (weight > 0) can win;
+    // otherwise an absent pressure could be declared "inescapable".
+    var best = null, bestW = 0;
     rootable.forEach(function (t) {
       var w = basePool[t] || 0;
       if (w > bestW) { bestW = w; best = t; }
+    });
+    if (best) return best;
+    // mild-mannered world with no deep constraint: fall back to the strongest
+    // pressure that is genuinely present, only then to a default.
+    var fbW = 0;
+    Object.keys(basePool).forEach(function (t) {
+      if (XG.CONCEPTS[t] && basePool[t] > fbW) { fbW = basePool[t]; best = t; }
     });
     return best || 'SCARCITY';
   }

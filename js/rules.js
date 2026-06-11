@@ -99,7 +99,7 @@
       title: 'Magneto-navigation', reveal: 'With no fixed sun to steer by, it reads the planet’s magnetic field and celestial cues as an innate compass.' },
     { id: 'sense_vibe', need: ['SUBSURFACE', 'HIGH_G'], weight: 0.9, emit: ['VIBRATION'], inst: I.BEHAV,
       title: 'Substrate vibration sense', reveal: 'It listens through the ground — seismic vibration sensing that turns the solid world into a medium for messages.' },
-    { id: 'sense_flicker', need: ['STROBE_LIGHT', 'BINARY'], weight: 0.9, emit: ['FAST_VISION'], inst: I.MORPH,
+    { id: 'sense_flicker', need: ['STROBE_LIGHT'], weight: 0.9, emit: ['FAST_VISION'], inst: I.MORPH,
       title: 'High flicker-fusion vision', reveal: 'Under stuttering double-star light, the visual system evolved a punishing refresh rate — it perceives flicker the way slower eyes perceive steady glow.' },
   ];
 
@@ -109,7 +109,7 @@
       title: 'Predictive social cognition', reveal: 'Survival meant modeling other minds — predators, prey, rivals. The result is a brain built for prediction and, inevitably, for deception.' },
     { id: 'cog_spatial', need: ['ECHO', 'SPATIAL_MAP', 'MIGRATION', 'SUBSURFACE'], weight: 1.2, emit: ['SPATIAL_MAP'], inst: I.BEHAV,
       title: 'Spatial cognition', reveal: 'A cognitive map is its core competence: vast, detailed memory of place, route, and resource laid over a remembered world.' },
-    { id: 'cog_plan', need: ['SCARCITY', 'BOOM_BUST', 'SEASONAL'], weight: 1.1, emit: ['PLANNING'], inst: I.BEHAV,
+    { id: 'cog_plan', need: ['SCARCITY', 'BOOM_BUST', 'THERMAL_SWING'], weight: 1.1, emit: ['PLANNING'], inst: I.BEHAV,
       title: 'Caching & planning', reveal: 'It hoards, plans, and defers gratification. Lean futures selected for minds that could see them coming and prepare.' },
     { id: 'cog_innov', need: ['INSTABILITY', 'BOOM_BUST', 'PATCHY'], weight: 1.2, emit: ['INNOVATION'], inst: I.BEHAV,
       title: 'Generalist innovation', reveal: 'An unpredictable world punished specialists, so it became an improviser — a flexible, curious generalist that learns its way through novelty.' },
@@ -141,7 +141,7 @@
       title: 'Sky-fear shelter cult', reveal: 'The sky itself is the enemy. Deep shelters, flare-warning rites, a cosmology in which safety means going down and in, never up and out.' },
     { id: 'cult_hoard', need: ['SCARCITY', 'TERRITORIAL', 'HIERARCHY'], weight: 1.0, emit: ['HOARD_RITUAL'], inst: I.CULT,
       title: 'Scarcity ritual economy', reveal: 'Gift and debt structure everything; waste is the deepest taboo. Wealth is hoarded, displayed, and ritually destroyed to signal status.' },
-    { id: 'cult_hive', need: ['EUSOCIAL', 'DISTRIBUTED', 'HIVE'], weight: 1.0, emit: ['HIVE_MIND_CULTURE'], inst: I.CULT,
+    { id: 'cult_hive', need: ['EUSOCIAL', 'DISTRIBUTED'], weight: 1.0, emit: ['HIVE_MIND_CULTURE'], inst: I.CULT,
       title: 'Distributed identity', reveal: 'Individuality is faint. Memory, story, and selfhood are colony-level; a single body matters about as much as a single cell does to us.' },
     { id: 'cult_ancestor', need: ['SELF_DOMESTICATION', 'PAIR_BOND', 'DEEP_TIME'], weight: 1.0, emit: ['ANCESTOR_RITE'], inst: I.CULT,
       title: 'Ancestor rites', reveal: 'The dead are kept: burial, relics, lineages remembered across generations. Care extended past death and became the root of religion.' },
@@ -155,9 +155,9 @@
       title: 'Fireless technology', reveal: 'Fire was impossible here, so technology took another road: bio-chemistry, electro-fabrication, cultivated organisms used as machines.' },
     { id: 'tech_eff', need: ['SCARCITY', 'HOARD_RITUAL'], weight: 1.0, emit: ['EFFICIENCY_TECH', 'TECH_CAPABLE'], inst: I.SING,
       title: 'Efficiency engineering', reveal: 'Technology obsessed with closing loops — recycling everything, zero waste, getting maximal work from minimal energy.' },
-    { id: 'tech_tidal', need: ['TERMINATOR', 'THERMOSYNTH', 'TIDAL'], weight: 0.9, emit: ['TIDAL_TECH', 'TECH_CAPABLE'], inst: I.SING,
+    { id: 'tech_tidal', need: ['TERMINATOR', 'THERMOSYNTH'], weight: 0.9, emit: ['TIDAL_TECH', 'TECH_CAPABLE'], inst: I.SING,
       title: 'Gradient-harvest grid', reveal: 'Power comes from the planet’s own gradients — tides, the eternal hot/cold terminator boundary, geothermal heat tapped at scale.' },
-    { id: 'tech_niche', need: ['NICHE', 'EUSOCIAL', 'TOOLS'], weight: 0.9, emit: ['NICHE_CONSTRUCTION', 'TECH_CAPABLE'], inst: I.SING,
+    { id: 'tech_niche', need: ['EUSOCIAL', 'TOOLS'], weight: 0.9, emit: ['NICHE_CONSTRUCTION', 'TECH_CAPABLE'], inst: I.SING,
       title: 'Planet-scale niche construction', reveal: 'It reshapes the environment to suit itself at continental scale — the same instinct that built termite mounds and human cities, run to its limit.' },
   ];
 

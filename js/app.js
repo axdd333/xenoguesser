@@ -192,11 +192,15 @@
   function init() {
     $('#submit-btn').addEventListener('click', submit);
     $('#new-btn').addEventListener('click', function () { newGame(); });
+    var shareTimer = null;
     $('#share-btn').addEventListener('click', function () {
       var url = location.origin + location.pathname + '?seed=' + encodeURIComponent(state.seed);
       navigator.clipboard && navigator.clipboard.writeText(url);
-      var b = $('#share-btn'); var old = b.textContent;
-      b.textContent = 'Seed link copied'; setTimeout(function () { b.textContent = old; }, 1400);
+      var b = $('#share-btn');
+      if (shareTimer) clearTimeout(shareTimer);
+      b.textContent = 'Seed link copied';
+      // restore to a fixed label so rapid re-clicks never freeze the temporary text
+      shareTimer = setTimeout(function () { b.textContent = 'Share seed'; }, 1400);
     });
     $('#seedform').addEventListener('submit', function (e) {
       e.preventDefault();
